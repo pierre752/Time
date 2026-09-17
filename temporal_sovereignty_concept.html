@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temporal Sovereignty</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-color: #f7f6f2; /* Cream/off-white for slow living aesthetic */
+            --text-primary: #1a1a1a;
+            --text-secondary: #5c5c5c;
+            --accent-color: #8c7a6b; /* Earthy tone */
+            --transition-slow: 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Lora', serif;
+            line-height: 1.8;
+            overflow-x: hidden;
+            /* Intentional friction: disable standard smooth scrolling to force measured engagement */
+            scroll-behavior: auto; 
+        }
+
+        h1, h2, h3, .sans-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .content-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity var(--transition-slow), transform var(--transition-slow);
+        }
+
+        .content-wrapper.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .friction-button {
+            background: transparent;
+            border: 1px solid var(--text-primary);
+            color: var(--text-primary);
+            padding: 1rem 2rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .friction-button::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background-color: var(--text-primary);
+            z-index: -1;
+            transition: width 2s linear; /* Slow hold-to-proceed mechanic */
+        }
+
+        .friction-button.holding::before {
+            width: 100%;
+        }
+
+        .friction-button.holding {
+            color: var(--bg-color);
+        }
+
+        .hold-instruction {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .friction-container:hover .hold-instruction {
+            opacity: 1;
+        }
+
+        .manifesto-rule {
+            margin-bottom: 4rem;
+            position: relative;
+            padding-left: 2rem;
+            border-left: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .manifesto-number {
+            position: absolute;
+            left: -1rem;
+            top: 0;
+            background: var(--bg-color);
+            padding: 0.2rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 300;
+            color: var(--accent-color);
+            font-size: 1.2rem;
+        }
+
+        .nav-dots {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 50;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: rgba(0,0,0,0.2);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .dot.active {
+            background-color: var(--text-primary);
+            transform: scale(1.5);
+        }
+
+        /* Hide sections initially to enforce sequential, intentional loading */
+        section {
+            display: none;
+        }
+        section.active-section {
+            display: block;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container">
+        <canvas id="timeCanvas"></canvas>
+    </div>
+
+    <div class="nav-dots" id="navDots">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+
+    <section id="section-1" class="active-section">
+        <div class="content-wrapper visible" id="content-1">
+            <h3 class="sans-font text-sm uppercase tracking-widest mb-4 text-gray-500">A Manifesto Against the Attention Economy</h3>
+            <h1 class="text-5xl md:text-7xl font-light mb-8 leading-tight">Temporal<br>Sovereignty</h1>
+            <p class="text-xl md:text-2xl text-gray-600 mb-12 max-w-2xl">
+                The modern sensation of time scarcity is a psychological phenomenon born from a mathematical mismatch. Your attention is the currency; acceleration is the method of extraction.
+            </p>
+            
+            <div class="friction-container mt-8 self-start">
+                <button class="friction-button" id="btn-next-1">
+                    <span>Reclaim Time</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <div class="hold-instruction">Hold to proceed deliberately</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="section-2">
+        <div class="content-wrapper" id="content-2">
+            <h2 class="text-4xl mb-12">The Illusion of Shrinking Time</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <p class="mb-6 text-lg">
+                        Chronological time has not changed. The 24 hours remain fixed. Yet, the list of modern expectations—urgent emails, infinite scrolls, algorithmic demands—continuously expands.
+                    </p>
+                    <p class="mb-6 text-lg">
+                        We are no longer running towards a bright horizon in the future; we are running away from the dark abyss behind our backs. Acceleration equals survival in the current paradigm.
+                    </p>
+                </div>
+                
+                <div class="p-8 border border-gray-300 relative">
+                    <div class="absolute -top-3 -left-3 bg-[#f7f6f2] px-2 text-sm sans-font text-gray-500">The Mismatch</div>
+                    <div class="text-center sans-font text-xl">
+                        <span class="block border-b border-gray-300 pb-2 mb-2">Constant Time (24h)</span>
+                        <span class="block text-gray-500">Expanding Expectations</span>
+                    </div>
+                    <div class="text-center mt-4 text-2xl">= Scarcity</div>
+                </div>
+            </div>
+
+            <div class="friction-container mt-16 self-start">
+                <button class="friction-button" id="btn-next-2">
+                    <span>Understand Architecture</span>
+                </button>
+                <div class="hold-instruction">Hold to proceed deliberately</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="section-3">
+        <div class="content-wrapper" id="content-3">
+            <h2 class="text-4xl mb-12">The Architecture of Resistance</h2>
+            <p class="text-xl mb-12">Digital minimalism is not a temporary detox; it is a systemic shift towards <em>Tempo Giusto</em>—the right speed.</p>
+            
+            <div class="manifesto-rule">
+                <span class="manifesto-number">01</span>
+                <h3 class="text-2xl mb-3">Memory Sovereignty</h3>
+                <p class="text-gray-600">Control over how your interactions are stored. Rejecting systems that separate user interface from data ownership.</p>
+            </div>
+
+            <div class="manifesto-rule">
+                <span class="manifesto-number">02</span>
+                <h3 class="text-2xl mb-3">Intentional Friction</h3>
+                <p class="text-gray-600">The absence of speed bumps enables algorithmic manipulation. We must reintroduce delays, manual logouts, and reflective pauses to break automaticity.</p>
+            </div>
+
+            <div class="manifesto-rule">
+                <span class="manifesto-number">03</span>
+                <h3 class="text-2xl mb-3">Fixed Interval Checking</h3>
+                <p class="text-gray-600">Sever the tie between boredom and reflexive scrolling. Replace variable rewards with clockwork certainty.</p>
+            </div>
+
+            <div class="friction-container mt-8 self-start">
+                <button class="friction-button" id="btn-next-3">
+                    <span>Synthesize</span>
+                </button>
+                <div class="hold-instruction">Hold to proceed deliberately</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="section-4">
+        <div class="content-wrapper text-center" id="content-4">
+            <h2 class="text-4xl mb-8">A Commitment to Character</h2>
+            
+            <blockquote class="text-2xl italic text-gray-600 max-w-3xl mx-auto mb-12 leading-relaxed">
+                "If a man does not keep pace with his companions, perhaps it is because he hears a different drummer."
+                <footer class="text-sm mt-4 sans-font not-italic text-gray-400">— Henry David Thoreau</footer>
+            </blockquote>
+
+            <p class="text-lg mb-16 max-w-2xl mx-auto">
+                Temporal sovereignty is a lifelong commitment to clearing the noise, finding your own pace, and ensuring technology simply allows you to become more yourself, rather than a data point in the attention economy.
+            </p>
+
+            <button class="friction-button" id="btn-restart" style="padding: 0.5rem 1rem; border-color: transparent; border-bottom-color: var(--text-primary);">
+                Return to Beginning
+            </button>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // Logic for 'Friction' Buttons (Hold to proceed)
+            const setupFrictionButton = (btnId, nextSectionIndex) => {
+                const btn = document.getElementById(btnId);
+                if (!btn) return;
+
+                let holdTimer;
+                const holdDuration = 1500; // 1.5 seconds to force slowness
+
+                const startHold = (e) => {
+                    // Prevent default touch behavior (like selection/scrolling)
+                    if(e.type === 'touchstart') e.preventDefault();
+                    btn.classList.add('holding');
+                    holdTimer = setTimeout(() => {
+                        btn.classList.remove('holding');
+                        transitionToSection(nextSectionIndex);
+                    }, holdDuration);
+                };
+
+                const stopHold = () => {
+                    btn.classList.remove('holding');
+                    clearTimeout(holdTimer);
+                };
+
+                // Mouse events
+                btn.addEventListener('mousedown', startHold);
+                btn.addEventListener('mouseup', stopHold);
+                btn.addEventListener('mouseleave', stopHold);
+                
+                // Touch events
+                btn.addEventListener('touchstart', startHold);
+                btn.addEventListener('touchend', stopHold);
+                btn.addEventListener('touchcancel', stopHold);
+            };
+
+            setupFrictionButton('btn-next-1', 2);
+            setupFrictionButton('btn-next-2', 3);
+            setupFrictionButton('btn-next-3', 4);
+            
+            const btnRestart = document.getElementById('btn-restart');
+            if(btnRestart) {
+                btnRestart.addEventListener('click', () => transitionToSection(1));
+            }
+
+            // Section Transition Logic
+            const transitionToSection = (targetIndex) => {
+                // Hide current
+                const currentActive = document.querySelector('.active-section');
+                const currentContent = currentActive.querySelector('.content-wrapper');
+                
+                currentContent.classList.remove('visible');
+                
+                setTimeout(() => {
+                    currentActive.classList.remove('active-section');
+                    
+                    // Show new
+                    const targetSection = document.getElementById(`section-${targetIndex}`);
+                    targetSection.classList.add('active-section');
+                    
+                    // Small delay to allow display:block to apply before animating opacity
+                    setTimeout(() => {
+                        targetSection.querySelector('.content-wrapper').classList.add('visible');
+                        updateDots(targetIndex);
+                        
+                        // Alter canvas parameters based on section
+                        updateCanvasState(targetIndex);
+                    }, 50);
+                    
+                }, 1200); // Wait for fade out
+            };
+
+            const updateDots = (index) => {
+                document.querySelectorAll('.dot').forEach((dot, i) => {
+                    if(i === index - 1) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+            };
+
+            // Generative Canvas Background (Representing Time/Entropy)
+            const canvas = document.getElementById('timeCanvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            let animationState = 1;
+
+            const resizeCanvas = () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            };
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            class Particle {
+                constructor() {
+                    this.reset();
+                }
+                
+                reset() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 2 + 0.5;
+                    this.baseSpeedX = (Math.random() - 0.5) * 0.5;
+                    this.baseSpeedY = (Math.random() - 0.5) * 0.5;
+                    this.life = Math.random();
+                }
+
+                update(state) {
+                    // State 1: Slow, ordered
+                    // State 2: Faster, representing mismatch
+                    // State 3: Structured, minimalist
+                    // State 4: Calm, sparse
+                    
+                    let speedMult = 1;
+                    if(state === 2) speedMult = 4;
+                    if(state === 4) speedMult = 0.5;
+
+                    this.x += this.baseSpeedX * speedMult;
+                    this.y += this.baseSpeedY * speedMult;
+                    
+                    if(state === 3) {
+                        // Move towards subtle grid pattern
+                        this.x += (Math.round(this.x / 50) * 50 - this.x) * 0.01;
+                        this.y += (Math.round(this.y / 50) * 50 - this.y) * 0.01;
+                    }
+
+                    if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                        this.reset();
+                    }
+                }
+
+                draw(state) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    
+                    let color = 'rgba(140, 122, 107, 0.3)'; // accent color
+                    if(state === 2) color = 'rgba(26, 26, 26, 0.4)'; // darker for anxiety/problem
+                    
+                    ctx.fillStyle = color;
+                    ctx.fill();
+                }
+            }
+
+            const initParticles = () => {
+                particles = [];
+                for(let i=0; i < 150; i++) {
+                    particles.push(new Particle());
+                }
+            };
+
+            const animate = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                particles.forEach(p => {
+                    p.update(animationState);
+                    p.draw(animationState);
+                });
+                
+                // Draw connections if state 3 (structured/minimalist network)
+                if (animationState === 3) {
+                    ctx.strokeStyle = 'rgba(140, 122, 107, 0.05)';
+                    ctx.lineWidth = 0.5;
+                    for (let i = 0; i < particles.length; i++) {
+                        for (let j = i + 1; j < particles.length; j++) {
+                            const dx = particles[i].x - particles[j].x;
+                            const dy = particles[i].y - particles[j].y;
+                            const dist = Math.sqrt(dx*dx + dy*dy);
+                            if (dist < 100) {
+                                ctx.beginPath();
+                                ctx.moveTo(particles[i].x, particles[i].y);
+                                ctx.lineTo(particles[j].x, particles[j].y);
+                                ctx.stroke();
+                            }
+                        }
+                    }
+                }
+                
+                requestAnimationFrame(animate);
+            };
+
+            initParticles();
+            animate();
+
+            // Export function to change canvas state from UI logic
+            window.updateCanvasState = (state) => {
+                animationState = state;
+            };
+            
+            // Initial fade in
+            setTimeout(() => {
+                document.getElementById('content-1').classList.add('visible');
+            }, 100);
+        });
+    </script>
+</body>
+</html>
